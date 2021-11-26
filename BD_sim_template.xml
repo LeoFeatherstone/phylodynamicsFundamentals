@@ -1,0 +1,41 @@
+<beast version='2.0'
+       namespace='master:master.model:master.steppers:master.conditions:master.postprocessors:master.outputs'>
+
+    <run spec='InheritanceTrajectory' samplePopulationSizes="true" verbosity="1" simulationTime="5"> <!-- simulationTime is the Duration of the outbreak-->
+        <model spec='Model' id='model'>
+            <population spec='Population' populationName='I' id='I'/>
+            <population spec='Population' populationName='R' id='R'/>
+	    <population spec="Population" populationName="I_sampled" id="I_sampled"/>
+            <reaction spec='Reaction' reactionName="Birth" rate="2"> <!-- lambda  -->
+              I -> I + I
+            </reaction>
+            <reaction spec='Reaction' reactionName="Death" rate="0.5"> <!-- mu -->
+              I -> R
+            </reaction>
+	    <reaction spec="Reaction" reactionName="Sampling" rate="0.5">  <!-- psi -->
+	      I -> I_sampled
+	    </reaction>
+        </model>
+
+        <initialState spec='InitState'>
+            <lineageSeed spec='Individual' population='@I'/>
+            <populationSize spec='PopulationSize' population='@R' size='0'/>
+	    <populationSize spec="PopulationSize" population="@I_sampled" size="0"/>
+        </initialState>
+
+        <!--populationEndCondition spec='PopulationEndCondition'
+				population='@I' threshold="0" exceedCondition="false"
+				isRejection="true"/-->
+
+        <!--populationEndCondition spec='PopulationEndCondition'
+				threshold="50" population='@I_sampled'
+				isRejection="false"/-->
+	
+	<postSimCondition spec="LeafCountPostSimCondition"
+			  nLeaves="100000" exact="false" exceedCondition="false"/>
+	<inheritancePostProcessor spec="LineageFilter" reactionName="Sampling"/>
+        <output spec='NewickOutput' fileName="BD.nwk.tre"/>
+	<!-- output spec="NexusOutput" fileName="BD_test1_R2.55_p0.7_.nexus.tree"/-->
+	<output spec='JsonOutput' fileName="BD.nwk.json"/>
+    </run>
+</beast>
